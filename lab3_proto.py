@@ -77,3 +77,5 @@ def hmmLoop(hmmmodels, namelist=None):
        phoneLoop = hmmLoop(phoneHMMs)
        wordLoop = hmmLoop(wordHMMs, ['o', 'z', '1', '2', '3'])
     """
+
+
