@@ -23,6 +23,8 @@ def words2phones(wordList, pronDict, addSilence=True, addShortPause=True):
                 a = pronDict[digit] +['sp']
             phoneTrans.append(a)
 
+    return phoneTrans
+
 
 def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
     """ forcedAlignmen: aligns a phonetic transcription at the state level
