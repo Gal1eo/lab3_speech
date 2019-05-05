@@ -21,7 +21,7 @@ def words2phones(wordList, pronDict, addSilence=True, addShortPause=True):
                 a = pronDict[digit] + ['sp'] + ['sil']
             else:
                 a = pronDict[digit] +['sp']
-            phoneTrans.append(a)
+            phoneTrans.append(a[0])
 
     return phoneTrans
 
@@ -40,6 +40,13 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
        list of strings in the form phoneme_index specifying, for each time step
        the state from phoneHMMs corresponding to the viterbi path.
     """
+    filename = 'tidigits/disc_4.1.1/tidigits/train/man/nw/z43a.wav'
+    samples, samplingrate = loadAudio(filename)
+    lmfcc = mfcc(samples)
+
+
+
+
 
 def hmmLoop(hmmmodels, namelist=None):
     """ Combines HMM models in a loop
