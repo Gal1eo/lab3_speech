@@ -1,5 +1,7 @@
 import numpy as np
 from lab3_tools import *
+from lab2_proto import *
+from lab2_tools import *
 
 def words2phones(wordList, pronDict, addSilence=True, addShortPause=True):
     """ word2phones: converts word level to phone level transcription adding silence
@@ -41,12 +43,11 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
        list of strings in the form phoneme_index specifying, for each time step
        the state from phoneHMMs corresponding to the viterbi path.
     """
-    filename = 'tidigits/disc_4.1.1/tidigits/train/man/nw/z43a.wav'
-    samples, samplingrate = loadAudio(filename)
-    lmfcc = mfcc(samples)
+    utteranceHMM = concatHMMs(phoneHMMs, phoneTrans)
+    log_emlik = log_multivariate_normal_density_diag(lmfcc, utteranceHMM['means'], utteranceHMM['covars'])
+    viterbi_loglik, viterbi_path = viterbi(log_emlik, np.log(utteranceHMM['startprob']), np.log(utteranceHMM['transmat']))
 
-
-
+    return viterbi_path
 
 
 def hmmLoop(hmmmodels, namelist=None):
