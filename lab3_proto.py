@@ -12,8 +12,17 @@ def words2phones(wordList, pronDict, addSilence=True, addShortPause=True):
     Output:
        list of phone symbols
     """
-    for i in range(len(wordList)):
-        if wordList[i] == pronDict[]
+    phoneTrans = []
+    for i,digit in enumerate(wordList):
+        if digit in pronDict.keys():
+            if i == 0:
+                a = ['sil'] + pronDict[digit] + ['sp']
+            elif i == len(wordList) - 1:
+                a = pronDict[digit] + ['sp'] + ['sil']
+            else:
+                a = pronDict[digit] +['sp']
+            phoneTrans.append(a)
+
 
 def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
     """ forcedAlignmen: aligns a phonetic transcription at the state level
