@@ -21,7 +21,8 @@ def words2phones(wordList, pronDict, addSilence=True, addShortPause=True):
                 a = pronDict[digit] + ['sp'] + ['sil']
             else:
                 a = pronDict[digit] +['sp']
-            phoneTrans.append(a[0])
+            #phoneTrans.append(a)
+            phoneTrans += a
 
     return phoneTrans
 
