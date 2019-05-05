@@ -6,6 +6,7 @@ from lab2_proto import *
 from lab1_proto import *
 from prondict import prondict
 import os
+import pdb
 
 
 if __name__ == '__main__':
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     stateTrans = [phone + '_' + str(stateid) for phone in phoneTrans \
                   for stateid in range(nstates[phone])]
     # TODO viterbiStateTrans = stateTrans viterbiState
-
+    pdb.set_trace()
     frames2trans(viterbiStateTrans, outfilename='z43a.lab')
 
 
