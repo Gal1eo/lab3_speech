@@ -179,7 +179,7 @@ def viterbi(log_emlik, log_startprob, log_transmat, forceFinalState=True):
             for i in range(M):
                 viterbiarray[n, i] = np.max(viterbiarray[n - 1, :M] + log_transmat[:M, i]) + log_emlik[n, i]
 
-    viterbi_path = np.argmax(viterbiarray, axis=1)
+    viterbi_path = np.argmax(viterbiarray, axis=1)#N*1
     viterbi_loglik = np.max(viterbiarray[-1, :])
 
     return viterbi_loglik, viterbi_path

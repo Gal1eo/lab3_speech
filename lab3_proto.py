@@ -49,7 +49,6 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
 
     return viterbi_path
 
-
 def hmmLoop(hmmmodels, namelist=None):
     """ Combines HMM models in a loop
 

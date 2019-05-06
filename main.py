@@ -26,10 +26,9 @@ if __name__ == '__main__':
 
     stateTrans = [phone + '_' + str(stateid) for phone in phoneTrans \
                   for stateid in range(nstates[phone])]
-    # TODO viterbiStateTrans = stateTrans viterbiState
-    pdb.set_trace()
+    viterbiStateTrans = [stateTrans[i] for i in viterbiState]
+    #pdb.set_trace()
     frames2trans(viterbiStateTrans, outfilename='z43a.lab')
-
 
     # 4.3
     traindata = []
@@ -38,8 +37,11 @@ if __name__ == '__main__':
             if file.endswith('.wav'):
                 filename = os.path.join(root, file)
     samples, samplingrate = loadAudio(filename)
-    #  TODO   for feature extraction and forced alignment
-    traindata.append({'filename': filename, 'lmfcc': lmfcc, 'mspec': 'mspec', 'targets': targets})
+    lmfcc = mfcc(samples, samplingrate=samplingrate)
+    mspec = mspec(samples,samplingrate=samplingrate)
+    # TODO  forced alignment
+    targets = stateList.index()
+    traindata.append({'filename': filename, 'lmfcc': lmfcc, 'mspec': mspec, 'targets': targets})
     np.savez('traindata.npz', traindata=traindata)
-    # same witht test files tidigits/disc_4.2.1/tidigits/test
+    # same with test files tidigits/disc_4.2.1/tidigits/test
 
