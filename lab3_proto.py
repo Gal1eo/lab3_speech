@@ -43,11 +43,13 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
        list of strings in the form phoneme_index specifying, for each time step
        the state from phoneHMMs corresponding to the viterbi path.
     """
-    utteranceHMM = concatHMMs(phoneHMMs, phoneTrans)
-    log_emlik = log_multivariate_normal_density_diag(lmfcc, utteranceHMM['means'], utteranceHMM['covars'])
-    viterbi_loglik, viterbi_path = viterbi(log_emlik, np.log(utteranceHMM['startprob']), np.log(utteranceHMM['transmat']))
+    log_emlik = log_multivariate_normal_density_diag(lmfcc, phoneHMMs['means'], phoneHMMs['covars'])
+    viterbi_loglik, viterbi_path = viterbi(log_emlik, np.log(phoneHMMs['startprob']), np.log(phoneHMMs['transmat']))
+    viterbiStateTrans = []
+    for i in range(viterbi_path.shape[0]):
+        viterbiStateTrans.append(phoneTrans[viterbi_path[i]])
 
-    return viterbi_path
+    return viterbiStateTrans
 
 def hmmLoop(hmmmodels, namelist=None):
     """ Combines HMM models in a loop
