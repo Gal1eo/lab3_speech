@@ -21,7 +21,6 @@ def task(task):
         phones = sorted(phoneHMMs.keys())
         nstates = {phone: phoneHMMs[phone]['means'].shape[0] for phone in phones}
         stateList = [ph + '_' + str(id) for ph in phones for id in range(nstates[ph])]
-        stateList.dump('statelist.dat')
         stateList = np.asarray(stateList)
         stateList.dump('statelist.dat')
 
@@ -69,9 +68,9 @@ def splitdata(path='traindata.npz', percent=0.1):
 
 
 def acoustic(dataset, feature='lmfcc', datasetname='train'):
-    if feature=='lmfcc':
+    if feature == 'lmfcc':
         features = np.empty((1,91))
-    elif feature=='mspec':
+    elif feature == 'mspec':
         features = np.empty((1, 280))
     elif feature == 'targets':
         features = np.empty(1)
@@ -79,18 +78,19 @@ def acoustic(dataset, feature='lmfcc', datasetname='train'):
         raise ValueError('No such feature!')
 
     for utterance in tqdm(dataset):
-        lmfcc_ = utterance[feature]
+        feature_ = utterance[feature]
+        dynamic_features = []
         if feature == 'targets':
-            lmfcc_feature = np.asarray(lmfcc_)
-            features = np.hstack((features, lmfcc_feature))
+            targets = np.asarray(feature_)
+            features = np.hstack((features, targets))
         else:
-            D = lmfcc_.shape[1] # 13 or 40
-            N = lmfcc_.shape[0]
+            D = feature_.shape[1] # 13 or 40
+            N = feature_.shape[0]
             lmfcc_feature = np.zeros((N, D*7))
             #lmfcc_ = np.vstack((lmfcc_[3], lmfcc_[2],lmfcc_[1], lmfcc_.reshape(1,-1)[0], lmfcc_[N-2], lmfcc_[N-3], lmfcc_[N-4]))
-            lmfcc_ = np.concatenate((lmfcc_[3], lmfcc_[2],lmfcc_[1], lmfcc_.reshape(1,-1)[0], lmfcc_[N-2], lmfcc_[N-3], lmfcc_[N-4]), axis=0)#1*1937
+            feature_ = np.concatenate((feature_[3], feature_[2],feature_[1], feature_.reshape(1,-1)[0], feature_[N-2], feature_[N-3], feature_[N-4]), axis=0)#1*1937
             for i in range(N):
-                lmfcc_feature[i] = lmfcc_[i*D:(i+7)*D]
+                lmfcc_feature[i] = feature_[i*D:(i+7)*D]
 
             features = np.vstack((features, lmfcc_feature))
 
@@ -99,66 +99,62 @@ def acoustic(dataset, feature='lmfcc', datasetname='train'):
 
     return features[1:]
 
+def normalize(train_x, val_x, test_x, feature='lmfcc'):
+    scaler_lmfcc = StandardScaler().fit(train_x)
+    # mean_lmfcc = scaler_lmfcc.mean_
+    # var_lmfcc = scaler_lmfcc.var_
+    lmfcc_train_x = scaler_lmfcc.transform(train_x)
+    lmfcc_train_x = lmfcc_train_x.astype('float32')
+    lmfcc_train_x.dump(f'{feature}_train_x.dat')
+
+    lmfcc_val_x = scaler_lmfcc.transform(val_x)
+    lmfcc_val_x = lmfcc_val_x.astype('float32')
+    lmfcc_val_x.dump(f'{feature}_val_x.dat')
+
+    lmfcc_test_x = scaler_lmfcc.transform(test_x)
+    lmfcc_test_X = lmfcc_test_x.astype('float32')
+    lmfcc_test_X.dump(f'{feature}_test_x.dat')
+    print(f'saved as {feature}_test_x.dat !')
+
+
+def encode(filename, set_name, StateLen=61):
+    set = np.load(filename)['traindata']
+    y = acoustic(set, feature='targets', datasetname=set_name)
+    output_dim = StateLen  # 61
+    y = np_utils.to_categorical(y, output_dim)  # 152751 * 61
+    y.dump(f'{set_name}_y.dat')
+    print(f'saved as {set_name}_y.dat !')
 
 
 if __name__ == '__main__':
     #task('4.3')
     #splitdata()
-    # feature(lmfcc and mspec) extraction, TODO: NEED CHECK
-    '''
+    """
+    feature(lmfcc and mspec) extraction
+    Do it in colab with GPU
+    """
     train_set = np.load('train_set.npz')['traindata']
-    lmfcc_train_x = acoustic(train_set,feature='lmfcc')
+    lmfcc_train_x = acoustic(train_set, feature='lmfcc')
     mspec_train_x = acoustic(train_set, feature='mspec')
-    scaler_lmfcc = StandardScaler().fit(lmfcc_train_x)
-    #mean_lmfcc = scaler_lmfcc.mean_
-    #var_lmfcc = scaler_lmfcc.var_
-    lmfcc_train_x = scaler_lmfcc.transform(lmfcc_train_x)
-    lmfcc_train_x = lmfcc_train_x.astype('float32')
-    lmfcc_train_x.dump('lmfcc_train_x.dat')
-
-    scaler_mspec = StandardScaler().fit(mspec_train_x)
-    mean_mspec = scaler_mspec.mean_
-    var_mspec = scaler_mspec.var_
-    mspec_train_x = scaler_mspec.transform(mspec_train_x)
-    mspec_train_x = mspec_train_x.astype('float32')
-    mspec_train_x.dump('mspec_train_x.dat')
 
     valid_set = np.load('valid_set.npz')['traindata']
-    lmfcc_val_x = acoustic(valid_set, feature='lmfcc',datasetname='val')
-    lmfcc_val_x = scaler_lmfcc.transform(lmfcc_val_x)
-    lmfcc_val_x = lmfcc_val_x.astype('float32')
-    lmfcc_val_x.dump('lmfcc_val_x.dat')
-
+    lmfcc_val_x = acoustic(valid_set, feature='lmfcc', datasetname='val')
     mspec_val_x = acoustic(valid_set, feature='mspec', datasetname='val')
-    mspec_val_x = scaler_mspec.transform(mspec_val_x)
-    mspec_val_x = mspec_val_x.astype('float32')
-    mspec_val_x.dump('mspec_val_x.dat')
 
     test_set = np.load('testdata.npz')['traindata']
     lmfcc_test_x = acoustic(test_set, feature='lmfcc', datasetname='test')
-    lmfcc_test_x = scaler_lmfcc.transform(lmfcc_test_x)
-    lmfcc_train_X = lmfcc_train_x.astype('float32')
-    lmfcc_test_X.dump('lmfcc_test_X.dat')
-    
     mspec_test_x = acoustic(test_set, feature='mspec', datasetname='test')
-    mspec_test_X = scaler_mspec.transform(mspec_test_x)
-    mspec_test_X = mspec_test_X.astype('float32')
-    mspec_test_X.dump('mspec_test_X.dat')
-    '''
 
-    # process the targets
-    valid_set = np.load('valid_set.npz')['traindata']
-    valid_y = acoustic(valid_set, feature='targets', datasetname='val')
-    StateList = np.load('statelist.dat')
-    output_dim = len(StateList)#61
-    valid_y = np_utils.to_categorical(valid_y, output_dim)#152751 * 61
-
-
-
-
-
-
-
+    """
+    Normalization & process the targerts
+    NEED CHECK
+    """
+    normalize(lmfcc_train_x, lmfcc_val_x,lmfcc_test_x)
+    normalize(mspec_train_x, mspec_val_x, mspec_test_x, feature='mspec')
+    #StateList = np.load('statelist.dat')
+    encode('valid_set.npz', 'val')
+    encode('testdata.npz', 'test')
+    encode('train_set.npz', 'train')
 
 
 
