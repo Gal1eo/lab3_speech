@@ -36,6 +36,11 @@ def task(task):
                   for stateid in range(nstates[phone])]
     viterbiStateTrans = forcedAlignment(lmfcc, utteranceHMM, stateTrans)
     # pdb.set_trace()
+    example = np.load('lab3_example.npz')['example'].item()
+    exampleTrans = example['viterbiStateTrans']
+    newviterbist = forcedAlignment(lmfcc, example['utteranceHMM'], example['stateTrans'])
+    print(newviterbist)
+    print(exampleTrans)
     frames2trans(viterbiStateTrans, outfilename='z43a.lab')
 
     if task == '4.3':
@@ -127,12 +132,14 @@ def encode(filename, set_name, StateLen=61):
 
 
 if __name__ == '__main__':
+    task('4.1')
     #task('4.3')
     #splitdata()
     """
     feature(lmfcc and mspec) extraction
     Do it in colab with GPU
     """
+    '''
     train_set = np.load('train_set.npz')['traindata']
     lmfcc_train_x = acoustic(train_set, feature='lmfcc')
     mspec_train_x = acoustic(train_set, feature='mspec')
@@ -155,6 +162,8 @@ if __name__ == '__main__':
     encode('valid_set.npz', 'val')
     encode('testdata.npz', 'test')
     encode('train_set.npz', 'train')
+    '''
+    example = np.load('lab3_example.npz').item()
 
 
 
